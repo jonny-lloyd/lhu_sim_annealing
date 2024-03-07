@@ -78,27 +78,40 @@ def perturbSolution(knapsack, allItems):
     maybe should only call when random is called for SA bc of heat, so it compares stochastic rather than just keeps
     going through making most optimal (maybe make most optimal as well to compare answer?)
     """
+    print("entering perturbation function")
+    counter = 0
     lowRatioItem = -999
     flag = False
     print("This is length of all items list: ", len(allItems))
 
     for item in knapsack:
+        """
+        find item with lowest val/weight ratio item
+        """
+
         itemRatio = item["value"] / item["weight"]
         print("Name:", item["name"], " V/W ratio:", itemRatio)
         if itemRatio < lowRatioItem:
             lowRatioItem = itemRatio
             lowRatioItemName = item["name"]
-            # itemIndex = item[]  TODO find index so can be replaced by new random item and check if new item is non dup
+            itemIndex = counter  # TODO find index so can be replaced by new random item and check if new item is non dup
+            print("Item count is:", itemIndex, "Item name is:", lowRatioItemName)
+        counter += 1
 
         while not flag:
+            """
+            replacing lowest val/weight item with random non-dup item - idea is continuous clean up 
+            """
+
             randomItem = allItems[random.randint(1, len(allItems)) - 1]
-            print("Random item: ", randomItem)
-            for x in knapsack:
+            print("\n\nRandom item: ", randomItem)
+            print("Low val item:ERRPR", lowRatioItemName)
+            for x in knapsack:  # think this needs to move
                 if x["name"] == randomItem["name"]:
-                    print("there is a duplicate, it is: ", x["name"])
+                    print("duplicate is: ", x["name"])
                 else:
-                    print("no duplicate")
-                    flag = 1
+                    print("no duplicate found, item is:", x["name"])
+                    flag = True  # check this is the right logic and check its not regen random item
             """
             if dup found then generate new random item and start again
             """
