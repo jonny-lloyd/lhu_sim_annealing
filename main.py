@@ -1,35 +1,6 @@
 import random
+from items import *
 
-items = [
-    {'name': 'iron_sword', 'weight': 25, 'value': 15},
-    {'name': 'wooden_bow', 'weight': 15, 'value': 15},
-    {'name': 'apple', 'weight': 1, 'value': 3},
-    {'name': 'sweetroll', 'weight': 1, 'value': 5},
-    {'name': 'dragon_bone', 'weight': 25, 'value': 500},
-    {'name': 'steel_mace', 'weight': 20, 'value': 25},
-    {'name': 'elven_bow', 'weight': 12, 'value': 150},
-    {'name': 'honey_nut_treat', 'weight': 2, 'value': 8},
-    {'name': 'mead', 'weight': 3, 'value': 10},
-    {'name': 'health_potion', 'weight': 0.5, 'value': 50},
-    {'name': 'mana_potion', 'weight': 0.5, 'value': 50},
-    {'name': 'stamina_potion', 'weight': 0.5, 'value': 50},
-    {'name': 'scroll_of_fireball', 'weight': 0.2, 'value': 25},
-    {'name': 'lockpick', 'weight': 0.1, 'value': 10},
-    {'name': 'torch', 'weight': 0.5, 'value': 5},
-    {'name': 'daedric_armour', 'weight': 30, 'value': 1000},
-    {'name': 'sapphire_necklace', 'weight': 1, 'value': 600},
-    {'name': 'silver_ring', 'weight': 1, 'value': 50},
-    {'name': 'ebony_dagger', 'weight': 15, 'value': 200},
-    {'name': 'diamond_ring', 'weight': 1, 'value': 800},
-    {'name': 'dwemer_cog', 'weight': 1, 'value': 25},
-    {'name': 'bear_pelt', 'weight': 3, 'value': 15},
-    {'name': 'honeycomb', 'weight': 0.1, 'value': 8},
-    {'name': 'broom', 'weight': 2, 'value': 5},
-    {'name': 'frost_salts', 'weight': 0.2, 'value': 100},
-    {'name': 'void_salts', 'weight': 0.2, 'value': 200},
-    {'name': 'gold_ring', 'weight': 1, 'value': 100},
-    {'name': 'glass_sword', 'weight': 17, 'value': 300}
-]
 knapsackCapacity = 100
 
 
@@ -72,17 +43,18 @@ def evalSolution(solution):  # if return is 0 discard solution, else compare ret
 
 def perturbSolution(knapsack, allItems):
     """
-    find lowest val ratio item and replace with random non-duplicate, this is a intuitive algorithmic approach that
+    find lowest val ratio item and replace with a random non-duplicate. This is an intuitive algorithmic approach that
     makes locally optimal choices at each step with the hope of finding a globally optimal solution
 
     maybe should only call when random is called for SA bc of heat, so it compares stochastic rather than just keeps
-    going through making most optimal (maybe make most optimal as well to compare answer?)
+    going through making most optimal (maybe make most optimal algo (so 3 in total) as well to compare answer?)
     """
-    print("entering perturbation function")
+    print("\nentering perturbation function")
     counter = 0
-    lowRatioItem = -999
-    flag = False
+    lowRatioItem = +999
+    flag = True
     print("This is length of all items list: ", len(allItems))
+    print("This is length of knapsack items: ", len(knapsack))
 
     for item in knapsack:
         """
@@ -90,7 +62,7 @@ def perturbSolution(knapsack, allItems):
         """
 
         itemRatio = item["value"] / item["weight"]
-        print("Name:", item["name"], " V/W ratio:", itemRatio)
+        print("\nName:", item["name"], " V/W ratio:", itemRatio)  # "Index:", itemIndex
         if itemRatio < lowRatioItem:
             lowRatioItem = itemRatio
             lowRatioItemName = item["name"]
@@ -98,23 +70,36 @@ def perturbSolution(knapsack, allItems):
             print("Item count is:", itemIndex, "Item name is:", lowRatioItemName)
         counter += 1
 
-        while not flag:
-            """
-            replacing lowest val/weight item with random non-dup item - idea is continuous clean up 
-            """
 
-            randomItem = allItems[random.randint(1, len(allItems)) - 1]
-            print("\n\nRandom item: ", randomItem)
-            print("Low val item:ERRPR", lowRatioItemName)
-            for x in knapsack:  # think this needs to move
-                if x["name"] == randomItem["name"]:
-                    print("duplicate is: ", x["name"])
-                else:
-                    print("no duplicate found, item is:", x["name"])
-                    flag = True  # check this is the right logic and check its not regen random item
-            """
-            if dup found then generate new random item and start again
-            """
+    while flag:  # while i havent found a non dup
+        '''
+        replacing lowest val/weight item with random non-dup item - idea is continuous clean up /refine the solution 
+        through successive iterations of item replacement
+        '''
+
+        randomItem = allItems[random.randint(1, len(allItems)) - 1]
+        print("\n\nLOWEST RATIO IS:", lowRatioItemName)
+        print("Random item: ", randomItem)
+        for x in knapsack:  # think this needs to move
+            if x["name"] == randomItem["name"]:
+                print("duplicate is: ", x["name"])
+                flag = False  # only flags when found -- flag up means were ok, flag down means dup
+
+        if not flag:
+            print("dup found, starting again")
+            flag = True
+
+        else:
+            print("No duplicate found, proceeding...\n\n")
+            break
+
+    print("Old knapsack:", knapsack)
+    knapsack[itemIndex] = randomItem
+    print("New knapsack:", knapsack)
+
+    return
+
+
 
 
 initialBag = generateInitialBag()
