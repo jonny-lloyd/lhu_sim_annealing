@@ -1,14 +1,19 @@
-import random
+"""
+essentially trying to compare an opportunistic (finds worst val/weight ratio then swaps a random item) vs stochastic (can
+still swap for worse solutions if its below temp, swaps entire bag) algorithm
+"""
 from items import *
+from perturb import *
+from objective import *
 
 knapsackCapacity = 100
 
 
-def generateInitialBag():
+def generateBag():
     bag = []
     for item in items:
         randChoice = random.randint(0, 1)
-        if randChoice == 1:  # selecting whether items are chosen or not randomly
+        if randChoice == 1:  # selecting whether items are chosen or not, randomly
             bag.append(item)
     return bag
 
@@ -33,7 +38,7 @@ def evalSolution(solution):  # if return is 0 discard solution, else compare ret
         for item in solution:
             totalVal += item["value"]
 
-        ratio = totalVal/totalWeight
+        ratio = totalVal / totalWeight
 
         print("total val:", totalVal)
         print("total weight:", totalWeight)
@@ -41,73 +46,57 @@ def evalSolution(solution):  # if return is 0 discard solution, else compare ret
         return ratio  # higher the ratio the more val per unit of weight
 
 
-def perturbSolution(knapsack, allItems):
+def simulated_annealing():
     """
-    find lowest val ratio item and replace with a random non-duplicate. This is an intuitive algorithmic approach that
-    makes locally optimal choices at each step with the hope of finding a globally optimal solution
-
-    maybe should only call when random is called for SA bc of heat, so it compares stochastic rather than just keeps
-    going through making most optimal (maybe make most optimal algo (so 3 in total) as well to compare answer?)
+    Evaluate the fitness of the newly generated solution.
+    If the solution violates the weight constraint, reject it with a certain probability determined by the current temperature and the degree of violation.
+    If the solution satisfies the weight constraint, compare its fitness with that of the current solution.
+    If the new solution is better (has a higher fitness), accept it.
+    If the new solution is worse, accept it with a certain probability determined by the current temperature and the magnitude of the difference in fitness between the new and current solutions.
+    Repeat this process for a certain number of iterations or until a termination condition is met.
     """
-    print("\nentering perturbation function")
-    counter = 0
-    lowRatioItem = +999
-    flag = True
-    print("This is length of all items list: ", len(allItems))
-    print("This is length of knapsack items: ", len(knapsack))
 
-    for item in knapsack:
-        """
-        find item with lowest val/weight ratio item
-        """
+    bag = generateBag()
+    while evalSolution(bag) == 0:  # checks if solution exceeds threshold only
+        bag = generateBag()
+    newTemp = 100
+    decayRate = 0.99
+    flag = False
 
-        itemRatio = item["value"] / item["weight"]
-        print("\nName:", item["name"], " V/W ratio:", itemRatio)  # "Index:", itemIndex
-        if itemRatio < lowRatioItem:
-            lowRatioItem = itemRatio
-            lowRatioItemName = item["name"]
-            itemIndex = counter  # TODO find index so can be replaced by new random item and check if new item is non dup
-            print("Item count is:", itemIndex, "Item name is:", lowRatioItemName)
-        counter += 1
+    print("\n\ngenerated bag: ", bag)
+    print("all items: ", items)
 
-
-    while flag:  # while i havent found a non dup
-        '''
-        replacing lowest val/weight item with random non-dup item - idea is continuous clean up /refine the solution 
-        through successive iterations of item replacement
-        '''
-
-        randomItem = allItems[random.randint(1, len(allItems)) - 1]
-        print("\n\nLOWEST RATIO IS:", lowRatioItemName)
-        print("Random item: ", randomItem)
-        for x in knapsack:  # think this needs to move
-            if x["name"] == randomItem["name"]:
-                print("duplicate is: ", x["name"])
-                flag = False  # only flags when found -- flag up means were ok, flag down means dup
-
-        if not flag:
-            print("dup found, starting again")
+    #temp loop
+    while not flag:
+        newTemp = (newTemp * decayRate)
+        print(f"\n{newTemp}")
+        decayRate -= 0.002
+        if newTemp < 0.02:
             flag = True
-
         else:
-            print("No duplicate found, proceeding...\n\n")
-            break
+            if evalSolution(bag) == 0:
+                bag = generateBag()  # flat out refusal to accept any bag over weight threshold, making the algorithm have a degree of fault tolerance
+                continue
+            else:
+                bag = objectiveFunction(newTemp, bag)
 
-    print("Old knapsack:", knapsack)
-    knapsack[itemIndex] = randomItem
-    print("New knapsack:", knapsack)
+                # perturbSolution(bag, items)
 
-    return
-
+    print("Final solution:", bag)
+    print("Final solution ratio:", evalSolution(bag))
 
 
+def main():
+    simulated_annealing()
 
-initialBag = generateInitialBag()
-print("\n\ngenerated bag: ", initialBag)
-print("all items: ", items)
 
-evalSolution(initialBag)
-perturbSolution(initialBag, items)
+if __name__ == "__main__":
+    main()
+
+
+
+
+
 
 
 
@@ -127,3 +116,6 @@ perturbSolution(initialBag, items)
 # Need to consider how close solution is to max capacity, if its v far off will never be optimal, however SA might do this for me anyways
 
 # could run SA in parallel and reference parallel that was spoke about in ai lit review, comparing my perturbSolution to traditional SA
+
+# COMPLETE
+# if new bag > weight capacity, delete, regenerate and rerun loop, else then evaluate
