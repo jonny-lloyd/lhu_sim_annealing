@@ -39,4 +39,4 @@ if __name__ == "__main__":
 # could run SA in parallel and reference parallel that was spoke about in ai lit review, comparing my perturbSolution to traditional SA
 
 # COMPLETE
-# if new bag > weight capacity, delete, regenerate and rerun loop, else then evaluate
+# if new bag > weight capacity, delete, regenerate and rerun loop, else then evaluate -- this now updated to < which made everything work --
