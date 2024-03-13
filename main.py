@@ -1,89 +1,10 @@
 """
-essentially trying to compare an opportunistic (finds worst val/weight ratio then swaps a random item) vs stochastic (can
-still swap for worse solutions if its below temp, swaps entire bag) algorithm
+essentially trying to compare an opportunistic (finds worst val/weight ratio then swaps a random item) against stochastic
+(can still swap for worse solutions if its below temp, swaps entire bag) algorithm
 """
-from items import *
-from perturb import *
-from objective import *
+from simAnnealing import *
 
 knapsackCapacity = 100
-
-
-def generateBag():
-    bag = []
-    for item in items:
-        randChoice = random.randint(0, 1)
-        if randChoice == 1:  # selecting whether items are chosen or not, randomly
-            bag.append(item)
-    return bag
-
-
-def evalSolution(solution):  # if return is 0 discard solution, else compare returned ratio to best, if better overwrite with new result and new ratio
-    """
-    pass in current bag, add up weight then val then find solution, if solution is over threshold then punish,
-    else return ratio and compare to alredy best ratio, if already best ratio is worse,
-    then make current bag the new bag
-    """
-
-    print("entering eval")
-    totalWeight = 0
-    totalVal = 0
-
-    for item in solution:
-        totalWeight += item["weight"]
-    if totalWeight > 100:
-        print("Exceeds capacity, weight is: ", totalWeight)
-        return 0
-    else:
-        for item in solution:
-            totalVal += item["value"]
-
-        ratio = totalVal / totalWeight
-
-        print("total val:", totalVal)
-        print("total weight:", totalWeight)
-        print("ratio:", ratio)
-        return ratio  # higher the ratio the more val per unit of weight
-
-
-def simulated_annealing():
-    """
-    Evaluate the fitness of the newly generated solution.
-    If the solution violates the weight constraint, reject it with a certain probability determined by the current temperature and the degree of violation.
-    If the solution satisfies the weight constraint, compare its fitness with that of the current solution.
-    If the new solution is better (has a higher fitness), accept it.
-    If the new solution is worse, accept it with a certain probability determined by the current temperature and the magnitude of the difference in fitness between the new and current solutions.
-    Repeat this process for a certain number of iterations or until a termination condition is met.
-    """
-
-    bag = generateBag()
-    while evalSolution(bag) == 0:  # checks if solution exceeds threshold only
-        bag = generateBag()
-    newTemp = 100
-    decayRate = 0.99
-    flag = False
-
-    print("\n\ngenerated bag: ", bag)
-    print("all items: ", items)
-
-    #temp loop
-    while not flag:
-        newTemp = (newTemp * decayRate)
-        print(f"\n{newTemp}")
-        decayRate -= 0.002
-        if newTemp < 0.02:
-            flag = True
-        else:
-            if evalSolution(bag) == 0:
-                bag = generateBag()  # flat out refusal to accept any bag over weight threshold, making the algorithm have a degree of fault tolerance
-                continue
-            else:
-                bag = objectiveFunction(newTemp, bag)
-
-                # perturbSolution(bag, items)
-
-    print("Final solution:", bag)
-    print("Final solution ratio:", evalSolution(bag))
 
 
 def main():

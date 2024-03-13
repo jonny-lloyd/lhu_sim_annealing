@@ -1,5 +1,6 @@
 import random
 
+
 def perturbSolution(knapsack, allItems):
     """
     find lowest val ratio item and replace with a random non-duplicate. This is an intuitive algorithmic approach that
@@ -28,7 +29,6 @@ def perturbSolution(knapsack, allItems):
             itemIndex = counter  # TODO find index so can be replaced by new random item and check if new item is non dup
             print("Item count is:", itemIndex, "Item name is:", lowRatioItemName)
         counter += 1
-
 
     while flag:  # while i havent found a non dup
         '''

@@ -1,4 +1,5 @@
-from main import *
+from generBag import *
+from eval import *
 
 
 def objectiveFunction(temp, solution):
@@ -26,10 +27,10 @@ def objectiveFunction(temp, solution):
         return solution
     else:
         randomVal = random.randint(1, 100)
-        if randomVal > temp:
-            print("rand is greater than temp threshold, so we accept")
+        if randomVal < temp:
+            print(f"rand {randomVal} is less than temp threshold {temp}, so we accept")
             solution = newSolution
             return solution
         else:
-            print("rand threshold lower than temp threshold, so we deny")
+            print("rand threshold greater than temp threshold, so we deny")
             return solution
